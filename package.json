@@ -1,0 +1,27 @@
+{
+  "name": "lambda-fast-deploy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Matheus Schettino",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon",
+    "prebuild": "tsc && cp package.json build/ && (cd build && yarn install --production --parseable)",
+    "build": "node-prune && cd build && zip -FSr ../code.zip .",
+    "postbuild": "yarn upload && yarn notify",
+    "upload": "aws lambda update-function-code --function-name $FN_NAME --zip-file fileb://code.zip --publish --profile $PROFILE",
+    "notify": "terminal-notifier -title 'Code deployed' -message 'Go check that out!' -open 'https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions/'$FN_NAME'?tab=graph'"
+  },
+  "nodemonConfig": {
+    "verbose": true,
+    "watch": [
+      "src/**/*"
+    ],
+    "ext": "ts",
+    "exec": "yarn run build"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.466.0"
+  },
+  "dependencies": {}
+}
